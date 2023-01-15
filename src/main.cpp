@@ -1,9 +1,10 @@
 #include <Arduino.h>
 
 #include <SPI.h>
+#include <RH_RF69.h>
 #include <SD.h>
 
-
+RH_RF69 rf69;
 Sd2Card scard;
 SdVolume sdsize;
 SdFile root;
@@ -13,11 +14,39 @@ const int chipselect = 8;
 void setup() {
   Serial.begin(9600);
 
+  Serial.print("\nStarting Initialization");
+
   //Wait for serial port to connect
   while (!Serial)
   {
     delay(100);
   }
+
+  //Initialize RFM
+  Serial.print("\nInitializing RFM. Please wait...");
+  if (!rf69.init())
+    {
+    Serial.println("\nFailed to initialize RFM. Try again.");
+    while (true);
+    } else{
+      Serial.println("\nRFM initialized!");
+    }
+
+    //Set the frequency that the RFM will use
+    rf69.setFrequency(434.2);
+    if (!rf69.setFrequency(434.2))
+    {
+      Serial.println("\nFailed to set RFM frequency to 434.2MHz");
+      while (true);
+    } else{
+      Serial.println("\nFrequency is set!(434.2MHz)");
+    }
+
+    //Set encryption
+    uint8_t key[] = {};
+    rf69.setEncryptionKey(key);
+    
+
   
   //Initialize SD reader
   Serial.print("\nInitializing SD card. Please wait...");
@@ -25,8 +54,8 @@ void setup() {
   {
     Serial.println("\nFailed to initialize SD card. Try again.");
     while (true);
-    
-  } else {
+
+  } else{
     Serial.println("SD card initialized!");
   }
 
