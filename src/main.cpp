@@ -1,17 +1,25 @@
 #include <Arduino.h>
 
 #include <SPI.h>
-#include <RH_RF69.h>
+#include <RH_RF95.h>
 #include <SD.h>
 
-RH_RF69 rf69;
+#define Freq 434.2F
+
+RH_RF95 rf96;
 Sd2Card scard;
 SdVolume sdsize;
 SdFile root;
 
+const int RFMpin = 4;
 const int chipselect = 8;
-
 void setup() {
+
+pinMode(4, OUTPUT);
+//!pinMode(51, );
+digitalWrite(4, HIGH);
+
+
   Serial.begin(9600);
 
   Serial.print("\nStarting Initialization");
@@ -24,7 +32,7 @@ void setup() {
 
   //Initialize RFM
   Serial.print("\nInitializing RFM. Please wait...");
-  if (!rf69.init())
+  if (!rf96.init())
     {
     Serial.println("\nFailed to initialize RFM. Try again.");
     while (true);
@@ -32,9 +40,11 @@ void setup() {
       Serial.println("\nRFM initialized!");
     }
 
+ rf96.setModeRx();
+
     //Set the frequency that the RFM will use
-    rf69.setFrequency(434.2);
-    if (!rf69.setFrequency(434.2))
+    rf96.setFrequency(434.2);
+    if (!rf96.setFrequency(Freq))
     {
       Serial.println("\nFailed to set RFM frequency to 434.2MHz");
       while (true);
@@ -43,8 +53,8 @@ void setup() {
     }
 
     //Set encryption
-    uint8_t key[] = {};
-    rf69.setEncryptionKey(key);
+    //uint8_t key[] = {};   //! Not working with this LoRa RFM only RFM 69
+    //rf96.setEncryptionKey(key);
     
 
   
@@ -116,5 +126,26 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+
+  if (rf96.waitAvailableTimeout(500))
+  {
+    if (rf96.recv(buf, &len))
+    {
+      Serial.print("\nRecieved data");
+      Serial.println((char*)buf);
+    } else{
+      Serial.println("\nNo data recieved");
+    }
+    
+  } else{
+    Serial.println("fail. Is CanSat online?");
+  }
+
+//datafile = SD.open(const String = Data.txt, uint8_t mode = )
+
+
+  delay(400);
+  
 }
