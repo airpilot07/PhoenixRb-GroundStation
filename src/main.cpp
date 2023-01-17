@@ -43,7 +43,6 @@ digitalWrite(4, HIGH);
  rf96.setModeRx();
 
     //Set the frequency that the RFM will use
-    rf96.setFrequency(434.2);
     if (!rf96.setFrequency(Freq))
     {
       Serial.println("\nFailed to set RFM frequency to 434.2MHz");
