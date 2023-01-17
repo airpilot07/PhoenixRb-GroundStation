@@ -10,26 +10,25 @@ Sd2Card scard;
 SdVolume sdsize;
 SdFile root;
 
-const int RFMpin = 4;
 const int chipselect = 8;
 
 void setup() {
 
   Serial.begin(9600);
 
-  Serial.print("\nStarting Initialization");
+  Serial.println("\nStarting Initialization");
 
   //Wait for serial port to connect
   while (!Serial);
 
   //Initialize RFM
-  Serial.print("\nInitializing RFM. Please wait...");
+  Serial.println("Initializing RFM. Please wait...");
   if (!rf96.init())
     {
     Serial.println("\nFailed to initialize RFM. Try again.");
     while (true);
     } else{
-      Serial.println("\nRFM initialized!");
+      Serial.print("RFM initialized!");
     }
 
  rf96.setModeRx();
