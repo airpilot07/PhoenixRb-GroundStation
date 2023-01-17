@@ -20,10 +20,7 @@ void setup() {
   Serial.print("\nStarting Initialization");
 
   //Wait for serial port to connect
-  while (!Serial)
-  {
-    delay(100);
-  }
+  while (!Serial);
 
   //Initialize RFM
   Serial.print("\nInitializing RFM. Please wait...");
