@@ -1,24 +1,19 @@
 #include <Arduino.h>
-
 #include <SPI.h>
 #include <RH_RF95.h>
 #include <SD.h>
 
 #define Freq 434.2F
 
-RH_RF95 rf96;
+RH_RF95 rf96(4, 3);
 Sd2Card scard;
 SdVolume sdsize;
 SdFile root;
 
 const int RFMpin = 4;
 const int chipselect = 8;
+
 void setup() {
-
-pinMode(4, OUTPUT);
-//!pinMode(51, );
-digitalWrite(4, HIGH);
-
 
   Serial.begin(9600);
 
@@ -125,26 +120,5 @@ digitalWrite(4, HIGH);
 }
 
 void loop() {
-  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
-
-  if (rf96.waitAvailableTimeout(500))
-  {
-    if (rf96.recv(buf, &len))
-    {
-      Serial.print("\nRecieved data");
-      Serial.println((char*)buf);
-    } else{
-      Serial.println("\nNo data recieved");
-    }
-    
-  } else{
-    Serial.println("fail. Is CanSat online?");
-  }
-
-//datafile = SD.open(const String = Data.txt, uint8_t mode = )
-
-
-  delay(400);
-  
+//main code
 }
