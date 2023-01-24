@@ -6,6 +6,7 @@
 #define Freq 434.2f     //RFM frequency
 #define rfmSelecPin 4   //RFM chipselect pin
 #define rfmIntPin 3     //RFM interrupt pin
+#define buzPin 5        //Buzzer enable pin
 #define datfile "datatext.txt"
 
 RH_RF95 rf96(rfmSelecPin, rfmIntPin);
@@ -17,7 +18,8 @@ void setup() {
   Serial.begin(9600);
 
   Serial.println("\nStarting Initialization");
-
+  tone(buzPin, 4500, 500);
+  
   //Wait for serial port to connect
   while (!Serial);
 
@@ -35,7 +37,7 @@ void setup() {
       Serial.println("RFM initialized!");
     } else{
       Serial.print("\nFailed to initialize RFM. Try again.");
-      while (false);
+      while (true);
     }
 
     //Set the frequency that the RFM will use
@@ -44,7 +46,7 @@ void setup() {
       Serial.println("\nFrequency is set!(434.2MHz)");
     } else{
       Serial.println("\nFailed to set RFM frequency to 434.2MHz");
-      while (false);
+      while (true);
     }
 
     rf96.setModeRx();  //set the RFM to recieve only mode
@@ -56,7 +58,7 @@ void setup() {
     Serial.println("SD card initialized!");
   } else{
     Serial.println("Failed to initialize SD card. Try again.");
-    while (false);
+    while (true);
   }
 
   Serial.println("Card type:   ");
