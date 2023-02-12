@@ -3,26 +3,26 @@
 #include <RH_RF95.h>
 #include <SD.h>
 
-#define Freq 434.2f     //RFM frequency
-#define rfmSelecPin 4   //RFM chipselect pin
-#define rfmIntPin 3     //RFM interrupt pin
-#define buzPin 5        //Buzzer enable pin
-#define datfile "datatext.txt"
+#define FREQ 434.2f     //RFM frequency
+#define RFM_CS 4   //RFM chipselect pin
+#define RFM_G0 3     //RFM interrupt pin
+#define BUZPIN 5        //Buzzer enable pin
+#define DATFILE "datatext.txt"
 
-RH_RF95 rf96(rfmSelecPin, rfmIntPin);
+RH_RF95 rf96(RFM_CS, RFM_G0);
 Sd2Card scard;
 SdVolume sdsize;
 File coldata;
 
 void setup() {
-  Serial.begin(9600);
-
-  Serial.println("\nStarting Initialization");
-  tone(buzPin, 4500, 5000);
+  while (!Serial)
+  {
+    Serial.begin(9600);
+  }
   
-  //Wait for serial port to connect
-  while (!Serial);
-
+  Serial.println("\nStarting Initialization");
+  tone(BUZPIN, 4500, 5000);
+  
   //Reset the RFM
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW);
@@ -41,7 +41,7 @@ void setup() {
     }
 
     //Set the frequency that the RFM will use
-    if (rf96.setFrequency(Freq))
+    if (rf96.setFrequency(FREQ))
     {
       Serial.println("\nFrequency is set!(434.2MHz)");
     } else{
@@ -95,11 +95,11 @@ void setup() {
  Serial.print("Volume size (Gb):   ");
  Serial.println((float)volumesize / 1024);
 
-if (SD.exists(datfile))
+if (SD.exists(DATFILE))
 {
-  SD.remove(datfile);
+  SD.remove(DATFILE);
 }
- coldata = SD.open(datfile, FILE_WRITE);
+ coldata = SD.open(DATFILE, FILE_WRITE);
 }
 
 void loop() {
@@ -115,7 +115,7 @@ void loop() {
     if (coldata)
     {
       coldata.println((char)buf);
-    } else{
+    }else {
      Serial.println("data.txt file wasn' t able to open");
     }
     
