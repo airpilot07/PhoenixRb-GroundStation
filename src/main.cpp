@@ -3,24 +3,27 @@
 #include <RH_RF95.h>
 #include <SD.h>
 
-#define Freq 434.2F
+#define FREQ 434.2f     //RFM frequency
+#define RFM_CS 4   //RFM chipselect pin
+#define RFM_G0 3     //RFM interrupt pin
+#define BUZPIN 5        //Buzzer enable pin
+#define DATFILE "datatext.txt"
 
-RH_RF95 rf96(4, 3);
+RH_RF95 rf96(RFM_CS, RFM_G0);
 Sd2Card scard;
 SdVolume sdsize;
-SdFile root;
-
-const int chipselect = 8;
+File coldata;
 
 void setup() {
-
-  Serial.begin(9600);
-
+  while (!Serial)
+  {
+    Serial.begin(9600);
+  }
+  
   Serial.println("\nStarting Initialization");
-
-  //Wait for serial port to connect
-  while (!Serial);
-
+  tone(BUZPIN, 4500, 5000);
+  
+  //Reset the RFM
   pinMode(2, OUTPUT);
   digitalWrite(2, LOW);
   delay(100);
@@ -29,97 +32,74 @@ void setup() {
 
   //Initialize RFM
   Serial.println("Initializing RFM. Please wait...");
-  if (!rf96.init())
+  if (rf96.init())
     {
-    Serial.println("\nFailed to initialize RFM. Try again.");
-    while (true);
+      Serial.println("RFM initialized!");
     } else{
-      Serial.print("RFM initialized!");
+      Serial.print("\nFailed to initialize RFM. Try again.");
+      while (true);
     }
-
- 
 
     //Set the frequency that the RFM will use
-    if (!rf96.setFrequency(Freq))
+    if (rf96.setFrequency(FREQ))
     {
+      Serial.println("\nFrequency is set!(434.2MHz)");
+    } else{
       Serial.println("\nFailed to set RFM frequency to 434.2MHz");
       while (true);
-    } else{
-      Serial.println("\nFrequency is set!(434.2MHz)");
     }
 
-    rf96.setModeRx();
-    //Set encryption
-    //uint8_t key[] = {};   //! Not working with this LoRa RFM only RFM 69
-    //rf96.setEncryptionKey(key);
-    
+    rf96.setModeRx();  //set the RFM to recieve only mode
 
+  //Initialize SD reader
+  Serial.print("\nInitializing SD card. Please wait...");
+  if (scard.init(100, 7))
+  {
+    Serial.println("SD card initialized!");
+  } else{
+    Serial.println("Failed to initialize SD card. Try again.");
+    while (true);
+  }
+
+  Serial.println("Card type:   ");
+  switch (scard.type())
+  {
+   case SD_CARD_TYPE_SD1:
+    Serial.println("SD1");
+    break;
   
-  //!Initialize SD reader
-  //Serial.print("\nInitializing SD card. Please wait...");
-  //if (!scard.init(SPI_HALF_SPEED, chipselect))
-  //{
-  //  Serial.println("\nFailed to initialize SD card. Try again.");
-  //  while (true);
+   case SD_CARD_TYPE_SD2:
+    Serial.println("SD2");
+    break;
 
-  //} else{
-  //  Serial.println("SD card initialized!");
-  //}
+   case SD_CARD_TYPE_SDHC:
+    Serial.println("SDHC");
+    break;
 
-  // Serial.println();
-  // Serial.print("Card type:   ");
-  // switch (scard.type())
-  // {
-  // case SD_CARD_TYPE_SD1:
-  //   Serial.println("SD1");
-  //   break;
-  
-  // case SD_CARD_TYPE_SD2:
-  //   Serial.println("SD2");
-  //   break;
+   default:
+    Serial.println("Unknown");
+    break;
+  }
 
-  // case SD_CARD_TYPE_SDHC:
-  //   Serial.println("SDHC");
-  //   break;
+  if (!sdsize.init(scard))
+  {
+    Serial.println("Could not find Fat16/Fat32 partition. \nMake sure the SD card is formatted");
+    while (true);
+  }
+ uint32_t volumesize;
+ Serial.print("Volume type is:   FAT");
+ Serial.println(sdsize.fatType(), DEC);
+ volumesize = sdsize.blocksPerCluster();
+ volumesize *= sdsize.clusterCount();
+ volumesize /= 1024;
+ Serial.print("Volume size (Gb):   ");
+ Serial.println((float)volumesize / 1024);
 
-  // default:
-  //   Serial.println("Unknown");
-  //   break;
-  // }
-
-  // if (!sdsize.init(scard))
-  // {
-  //   Serial.println("Could not find Fat16/Fat32 partition. \nMake sure the SD card is formatted");
-  //   while (true);
-    
-  // }
-
-  // Serial.print("Clusters:   ");
-  // Serial.println(sdsize.clusterCount());
-  // Serial.print("Blocks x Cluster:   ");
-  // Serial.println(sdsize.blocksPerCluster());
-  // Serial.print("Total Blocks:   ");
-  // Serial.println(sdsize.blocksPerCluster() * sdsize.clusterCount());
-  // Serial.println();
-
-  // uint32_t volumesize;
-  // Serial.print("Volume type is:   FAT");
-  // Serial.println(sdsize.fatType(), DEC);
-  // volumesize = sdsize.blocksPerCluster();
-  // volumesize *= sdsize.clusterCount();
-  // volumesize /= 2;
-  // Serial.print("Volume size (Kb):   ");
-  // Serial.println(volumesize);
-  // Serial.print("Volume size (Mb):   ");
-  // volumesize /= 1024;
-  // Serial.println(volumesize);
-  // Serial.print("Volume size (Gb):   ");
-  // Serial.println((float)volumesize / 1024.0f);
-  // Serial.println("\nFiles found on the card (name, date and size in bytes):   ");
-  // root.openRoot(sdsize);
-  // root.ls(LS_R | LS_DATE | LS_SIZE);
-  // root.close();
-  
+if (SD.exists(DATFILE))
+{
+  SD.remove(DATFILE);
+}
+ coldata = SD.open(DATFILE, FILE_WRITE);
 }
 
 void loop() {
@@ -132,7 +112,13 @@ void loop() {
     }
     Serial.print("\n");
     
-    //SD.open("datatest.txt", )
+    if (coldata)
+    {
+      coldata.println((char)buf);
+    }else {
+     Serial.println("data.txt file wasn' t able to open");
+    }
+    
   }
   
 }
