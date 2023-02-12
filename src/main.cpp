@@ -18,7 +18,7 @@ void setup() {
   Serial.begin(9600);
 
   Serial.println("\nStarting Initialization");
-  tone(buzPin, 4500, 500);
+  tone(buzPin, 4500, 5000);
   
   //Wait for serial port to connect
   while (!Serial);
@@ -53,7 +53,7 @@ void setup() {
 
   //Initialize SD reader
   Serial.print("\nInitializing SD card. Please wait...");
-  if (scard.init())
+  if (scard.init(100, 7))
   {
     Serial.println("SD card initialized!");
   } else{
@@ -93,7 +93,7 @@ void setup() {
  volumesize *= sdsize.clusterCount();
  volumesize /= 1024;
  Serial.print("Volume size (Gb):   ");
- Serial.println((float)volumesize / 1024.0f);
+ Serial.println((float)volumesize / 1024);
 
 if (SD.exists(datfile))
 {
