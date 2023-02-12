@@ -31,40 +31,36 @@ void setup() {
 
   //Initialize RFM
   Serial.println("Initializing RFM. Please wait...");
-  if (rf96.init())
-    {
+  if (rf96.init()) {
       Serial.println("RFM initialized!");
-    }else {
+    } else {
       Serial.print("\nFailed to initialize RFM. Try again.");
       while (true);
     }
 
     //Set the frequency that the RFM will use
-    if (rf96.setFrequency(FREQ))
-    {
-      Serial.println("\nFrequency is set!(434.2MHz)");
-    }else {
-      Serial.println("\nFailed to set RFM frequency to 434.2MHz");
-      while (true);
-    }
+  if (rf96.setFrequency(FREQ)) {
+    Serial.println("\nFrequency is set!(434.2MHz)");
+  } else {
+    Serial.println("\nFailed to set RFM frequency to 434.2MHz");
+    while (true);
+  }
 
-    rf96.setModeRx();  //set the RFM to recieve only mode
+  rf96.setModeRx();  //set the RFM to recieve only mode
 
   //Initialize SD reader
   Serial.print("\nInitializing SD card. Please wait...");
-  if (scard.init(100, 7))
-  {
+  if (scard.init(100, 7)) {
     Serial.println("SD card initialized!");
-  }else {
+  } else {
     Serial.println("Failed to initialize SD card. Try again.");
     while (true);
   }
 
-if (SD.exists(DATFILE))
-{
-  SD.remove(DATFILE);
-}
- coldata = SD.open(DATFILE, FILE_WRITE);
+  if (SD.exists(DATFILE)) {
+    SD.remove(DATFILE);
+  }
+  coldata = SD.open(DATFILE, FILE_WRITE);
 }
 
 void loop() {
@@ -77,11 +73,10 @@ void loop() {
     }
     Serial.print("\n");
     
-    if (coldata)
-    {
+    if (coldata) {
       coldata.println((char)buf);
-    }else {
-     Serial.println("data.txt file wasn' t able to open");
+    } else {
+      Serial.println("data.txt file wasn' t able to open");
     }
     
   }
