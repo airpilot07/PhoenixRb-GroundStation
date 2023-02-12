@@ -20,7 +20,9 @@ void setup() {
   }
   
   Serial.println("\nStarting Initialization");
-  tone(BUZPIN, 4500, 5000);
+  tone(BUZPIN, 450);
+  delay(500);
+  noTone;
   
   //Reset the RFM
   pinMode(2, OUTPUT);
