@@ -3,8 +3,9 @@
 #include <RH_RF95.h>
 
 #define FREQ 434.2f     //RFM frequency
-#define RFM_CS 4   //RFM chipselect pin
-#define RFM_G0 3     //RFM interrupt pin
+#define RFM_CS 4        //RFM chipselect pin
+#define RFM_G0 3        //RFM interrupt pin
+#define RFM_RST 2       //RFM reset pin
 
 RH_RF95 rf96(RFM_CS, RFM_G0);
 
@@ -14,10 +15,10 @@ void setup() {
   Serial.println("\nStarting Initialization");
   
   //Reset the RFM
-  pinMode(2, OUTPUT);
-  digitalWrite(2, LOW);
+  pinMode(RFM_RST, OUTPUT);
+  digitalWrite(RFM_RST, LOW);
   delay(100);
-  digitalWrite(2, HIGH);
+  digitalWrite(RFM_RST, HIGH);
   delay(100);
 
   //Initialize RFM
@@ -46,5 +47,8 @@ void loop() {
   {
     Serial.println((char*)buf);
     Serial.print("\n");
+
+    Serial.print("RSSI: ");
+    Serial.println(rf96.lastRssi(), DEC);
   }
 }
