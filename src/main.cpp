@@ -27,7 +27,7 @@ void setup()
   Serial.println("\nStarting Initialization");
   tone(BUZPIN, 450);
   delay(500);
-  noTone;
+  noTone(BUZPIN);
   
   //Reset the RFM
   pinMode(RFID_RST, OUTPUT);
@@ -72,10 +72,22 @@ void setup()
   if (SD.exists(DATFILE))
   {
     SD.remove(DATFILE);
-    coldata = SD.open(DATFILE, FILE_WRITE);
   }
 }
 
 void loop()
 {
+  uint8_t buf[RH_RF95_MAX_MESSAGE_LEN];
+  uint8_t len = sizeof(buf);
+  if (rf96.recv(buf, &len))
+  {
+    Serial.println((char*)buf);
+
+    coldata = SD.open(DATFILE, FILE_WRITE);
+    coldata.write((char*)buf);
+    coldata.close();
+
+    Serial.println("RSSI: ");
+    Serial.print(rf96.lastRssi(), DEC);
+  }
 }
