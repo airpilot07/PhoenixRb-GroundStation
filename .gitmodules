@@ -4,6 +4,6 @@
 [submodule "lib/RadioHead"]
 	path = lib/RadioHead
 	url = https://github.com/adafruit/RadioHead
-[submodule "rfid"]
-	path = rfid
+[submodule "lib/rfid"]
+	path = lib/rfid
 	url = https://github.com/miguelbalboa/rfid
