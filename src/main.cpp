@@ -2,7 +2,9 @@
 #include <SPI.h>
 #include <RH_RF95.h>
 #include <SD.h>
-
+#include <MFRC522.h>
+#include <megalovania.h>
+#include <rickroll.h>
 #define FREQ 434.2f //RFM frequency
 #define RFM_CS 4    //RFM chipselect pin
 #define RFM_G0 3    //RFM interrupt pin
@@ -12,17 +14,23 @@
 #define RFID_RST 6  //RFID reset pin
 #define BUZPIN 48   //Buzzer enable pin
 #define DATFILE "datatext.txt"
+#define poitxt "poi.txt"
 
 RH_RF95 rf96(RFM_CS, RFM_G0);
-Sd2Card scard;
+MFRC522 rfid(RFID_CS, RFID_RST);
 File coldata;
+
+bool gui = true;
+bool musicunlock = false;
+char* packet;
+int pois = 0;
 
 void setup()
 {
-  while (!Serial)
-  {
+  // while (!Serial)
+  // {
     Serial.begin(9600);
-  }
+  // }
 
   Serial.println("\nStarting Initialization");
   tone(BUZPIN, 450);
@@ -60,7 +68,7 @@ void setup()
   //Initialize SD reader
   Serial.println("Initializing SD card. Please wait...");
 
-  if (scard.init(SPI_FULL_SPEED, SD_CS))
+  if (SD.begin(SD_CS))
   {
     Serial.println("SD card initialized!");
   } else
@@ -69,10 +77,15 @@ void setup()
     while (true);
   }
 
-  if (SD.exists(DATFILE))
-  {
-    SD.remove(DATFILE);
-  }
+  //Initialize the RFID
+  Serial.println("Initializing the RFID. Please wait...");
+
+  rfid.PCD_Init();    
+  Serial.println("RFID initialization ended.");
+
+  tone(BUZPIN, 900);
+  delay(600);
+  noTone(BUZPIN);
 }
 
 void loop()
@@ -81,13 +94,65 @@ void loop()
   uint8_t len = sizeof(buf);
   if (rf96.recv(buf, &len))
   {
-    Serial.println((char*)buf);
+    packet = (char*)buf;
+    if (packet[0] == 'P'
+        && packet[1] == 'R'
+        && packet[2] == 'b'
+        && packet[3] == '_')
+    {
+      /* code */
+    }
+    
+    if (!gui)
+    {
+      Serial.println(packet);
+    }
 
     coldata = SD.open(DATFILE, FILE_WRITE);
     coldata.write((char*)buf);
     coldata.close();
 
-    Serial.println("RSSI: ");
-    Serial.print(rf96.lastRssi(), DEC);
+    if (!gui)
+    {
+      Serial.println("RSSI: ");
+      Serial.print(rf96.lastRssi(), DEC);
+    }
+
+    
   }
+
+  while (!Serial.available() == 0)
+  {
+    // if (Serial.readString() == "poi")
+    // {
+    //   gui = false;
+    // }
+
+    // if (Serial.readString() == "music")
+    // {
+    //   musicunlock = true;
+    //   Serial.println("oki");
+    // }
+  
+    // if (Serial.readString() == "nomusic")
+    // {
+    //   musicunlock = false;
+    // }
+
+    gui = false;
+
+    coldata = SD.open(poitxt);
+    Serial.write(coldata.read());
+    coldata.close();
+  }
+
+  if (rfid.PICC_IsNewCardPresent() & musicunlock)
+  {
+    rickroll(BUZPIN);
+  }
+  coldata = SD.open(poitxt, FILE_WRITE);
+  coldata.println("hello this is a poi");
+  coldata.print(pois = pois + 1);
+  coldata.close();
+  Serial.println("running");
 }
